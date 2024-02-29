@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.23;
+
+interface IZKAVerifier {
+    function zkpVerify(bytes calldata zkProof) external returns (bool);
+
+    function ZKAFactory() external view returns (address);
+
+    function ZKVerifier() external view returns (address);
+
+    function initializer(address _ZKAFactory, address _ZKVerifier) external;
+}
