@@ -34,6 +34,7 @@ contract ZKAFactory is Ownable, IZKAFactory {
         bytes32 proofKey
     ) external override onlyVerifier(msg.sender) {
         proofInStorage[proofKey] = uint64(block.timestamp);
+        emit proofToStorageInfo(proofKey, uint64(block.timestamp));
     }
 
     function deployZKAVerifier(
@@ -58,7 +59,7 @@ contract ZKAFactory is Ownable, IZKAFactory {
             deployTimestamp: uint64(block.timestamp)
         });
         verifierAddress.push(_zkVerifier);
-
+        emit newZKAVerifierInfo(_zkVerifier, _zkpVerifierName, _url, _deployer);
         return _zkVerifier;
     }
 

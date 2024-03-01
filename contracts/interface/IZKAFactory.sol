@@ -9,6 +9,15 @@ interface IZKAFactory {
         uint64 deployTimestamp;
     }
 
+    event newZKAVerifierInfo(
+        address indexed _zkVerifier,
+        string _zkpVerifierName,
+        string _url,
+        address _deployer
+    );
+
+    event proofToStorageInfo(bytes32 indexed _proofKey, uint64 _saveTimestamp);
+
     /// @dev to check if the proof is already in storage
     /// @param proofKey the key of the proof, keccak256(abi.encodePack(proof, ZKAVerifierAddress))
     /// @return the save-timestamp of proof

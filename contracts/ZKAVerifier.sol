@@ -3,13 +3,13 @@ pragma solidity ^0.8.23;
 
 import {IZKAVerifier} from "./interface/IZKAVerifier.sol";
 import {IZKAFactory} from "./interface/IZKAFactory.sol";
-import {ZKAVerifierLib} from "./library/ZKAVerifierLib.sol";
 
 contract ZKAVerifier is IZKAVerifier {
     error AlreadyInitialized();
-    using ZKAVerifierLib for bytes;
     address public override ZKAFactory;
     address public override ZKVerifier;
+
+    constructor() {}
 
     function initializer(address _ZKAFactory, address _ZKVerifier) external {
         if (ZKAFactory != address(0) || ZKVerifier != address(0)) {
@@ -23,7 +23,13 @@ contract ZKAVerifier is IZKAVerifier {
         bytes calldata zkProof
     ) external override returns (bool) {
         (bool success, ) = ZKVerifier.call(zkProof);
-        IZKAFactory(ZKAFactory).proofToStorage(zkProof.fetchProofKey());
+        IZKAFactory(ZKAFactory).proofToStorage(fetchProofKey(zkProof));
         return success;
+    }
+
+    function fetchProofKey(
+        bytes calldata proof
+    ) internal view returns (bytes32) {
+        return keccak256(abi.encode(proof, address(this)));
     }
 }
