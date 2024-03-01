@@ -8,15 +8,15 @@ import {IZKAVerifier} from "./interface/IZKAVerifier.sol";
 
 contract ZKAFactory is Ownable, IZKAFactory {
     error NotOfficialVerifier();
-    VerifierInfo public verifierInfo;
     address public override implZKAVerifier;
     mapping(bytes32 proofKey => uint64 verifyTimestamp)
         public
         override proofInStorage;
-    mapping(address => VerifierMeta) public listOfZKAVerifiers;
+    mapping(address => VerifierMeta) public metaZKAVerifiers;
+    address[] public verifierAddress;
 
     modifier onlyVerifier(address _verifier) {
-        if (listOfZKAVerifiers[_verifier].deployTimestamp == 0) {
+        if (metaZKAVerifiers[_verifier].deployTimestamp == 0) {
             revert NotOfficialVerifier();
         }
         _;
@@ -51,16 +51,13 @@ contract ZKAFactory is Ownable, IZKAFactory {
             _zkpVerifierAddress
         );
 
-        listOfZKAVerifiers[_zkVerifier] = VerifierMeta({
+        metaZKAVerifiers[_zkVerifier] = VerifierMeta({
             zkpVerifierName: _zkpVerifierName,
             url: _url,
             deployer: _deployer,
             deployTimestamp: uint64(block.timestamp)
         });
-        VerifierInfo memory _verifierInfo = verifierInfo;
-        _verifierInfo.verifierNumbers += 1;
-        _verifierInfo.latestVerifier = _zkVerifier;
-        verifierInfo = _verifierInfo;
+        verifierAddress.push(_zkVerifier);
 
         return _zkVerifier;
     }
@@ -71,16 +68,14 @@ contract ZKAFactory is Ownable, IZKAFactory {
         override
         returns (address[] memory, VerifierMeta[] memory)
     {
-        address[] memory _zkVerifierAddresses = new address[](
-            verifierInfo.verifierNumbers
-        );
-        VerifierMeta[] memory _zkVerifierMetas = new VerifierMeta[](
-            verifierInfo.verifierNumbers
-        );
-        for (uint64 i = 0; i < verifierInfo.verifierNumbers; i++) {
-            _zkVerifierAddresses[i] = address(this);
-            _zkVerifierMetas[i] = listOfZKAVerifiers[address(this)];
+        uint256 _length = verifierAddress.length;
+        address[] memory _verifiers = new address[](_length);
+        VerifierMeta[] memory _meta = new VerifierMeta[](_length);
+
+        for (uint256 i = 0; i < _length; i++) {
+            _verifiers[i] = verifierAddress[i];
+            _meta[i] = metaZKAVerifiers[verifierAddress[i]];
         }
-        return (_zkVerifierAddresses, _zkVerifierMetas);
+        return (_verifiers, _meta);
     }
 }
