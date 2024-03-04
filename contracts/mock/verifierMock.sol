@@ -11,11 +11,13 @@ contract VerifierMock is IverifierMock {
         return true;
     }
 
-    function getVerifyCalldata() external pure returns (bytes memory) {
+    function getVerifyCalldata(
+        string calldata salt
+    ) external pure returns (bytes memory) {
         return
             abi.encodeWithSignature(
                 "verify(bytes)",
-                keccak256(abi.encode("proof"))
+                keccak256(abi.encode("proof", salt))
             );
     }
 }

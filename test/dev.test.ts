@@ -23,7 +23,7 @@ describe("ZKProofAggregator-UnitTest", () => {
   let zkpVerifierMock: VerifierMock;
   let deployer: HardhatEthersSigner;
   let zkaFactory: ZKAFactory;
-  let zkaVerifierInstance: ZKAVerifier;
+  let zkaVerifierInstance: ZKAVerifier[];
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -45,8 +45,24 @@ describe("ZKProofAggregator-UnitTest", () => {
       deployerAddress,
       zkpVerifierAddress
     );
+    console.log("zkaVerifier address: ", newZKAVerifier);
 
-    zkaVerifierInstance = await getZKAVerifier(deployer, newZKAVerifier);
+    const zkpVerifierName2 = "SNARK";
+    const url2 = "http://localhost:8001";
+    const zkpVerifierAddress2 = await zkpVerifierMock.getAddress();
+    const newZKAVerifier2 = await deployZKAVerifier(
+      zkaFactory,
+      zkpVerifierName2,
+      url2,
+      deployerAddress,
+      zkpVerifierAddress2
+    );
+    console.log("newZKAVerifier2 address: ", newZKAVerifier2);
+
+    zkaVerifierInstance = [
+      await getZKAVerifier(deployer, newZKAVerifier),
+      await getZKAVerifier(deployer, newZKAVerifier2),
+    ];
   });
 
   it("test all contracts should been deployed", async () => {
@@ -55,27 +71,37 @@ describe("ZKProofAggregator-UnitTest", () => {
   });
 
   it("create new ZKAVerifier", async () => {
-    expect((await zkaVerifierInstance.getDeployedCode())?.length).gt(2);
+    zkaVerifierInstance.forEach(async (zkaVerifier) => {
+      expect((await zkaVerifier.getDeployedCode())?.length).gt(2);
 
-    const zkaMetaJustDeployed: IZKAFactory.VerifierMetaStruct =
-      await zkaFactory.metaZKAVerifiers(await zkaVerifierInstance.getAddress());
-    console.log("zkaMetaJustDeployed: ", zkaMetaJustDeployed);
+      const zkaMetaJustDeployed: IZKAFactory.VerifierMetaStruct =
+        await zkaFactory.metaZKAVerifiers(await zkaVerifier.getAddress());
+      console.log("zkaMetaJustDeployed: ", zkaMetaJustDeployed);
+    });
 
     const allZKAVerifiers = await zkaFactory.fetchAllZKAVerifiers();
     console.log("allZKAVerifiers: ", allZKAVerifiers);
   });
 
   it("test ZKAVerifier with mock proof", async () => {
-    const mockProof = await getMockProof();
-    const { verifyResult, proofKey, saveTimestamp } = await zkpVerify(
-      deployer,
-      await zkaVerifierInstance.getAddress(),
-      zkaFactory,
-      mockProof
-    );
-    expect(verifyResult).to.be.true;
-    const timestampInStorage = await zkaFactory.proofInStorage(proofKey);
-    expect(timestampInStorage).to.equal(saveTimestamp);
+    // zkaVerifierInstance.forEach(async (zkaVerifier) => {
+    for (const zkaVerifier of zkaVerifierInstance){
+      const mockProof = await getMockProof(await zkaVerifier.getAddress());
+      console.log("mockProof ", mockProof);
+      const { verifyResult, proofKey, saveTimestamp } = await zkpVerify(
+        deployer,
+        await zkaVerifier.getAddress(),
+        zkaFactory,
+        mockProof
+      );
+
+      console.log("saveTimestamp: ", saveTimestamp);
+      console.log("proofKey: ", proofKey);
+      expect(verifyResult).to.be.true;
+      const timestampInStorage = await zkaFactory.proofInStorage(proofKey);
+      console.log("timestampInStorage: ", timestampInStorage);
+      expect(timestampInStorage).to.equal(saveTimestamp);
+    }
   });
 });
 
@@ -87,11 +113,11 @@ async function getZKAVerifier(
   return instance as ZKAVerifier;
 }
 
-async function getMockProof(): Promise<string> {
+async function getMockProof(salt: string): Promise<string> {
   const veiriferMock = await new VerifierMock__factory(
     (
       await ethers.getSigners()
     )[0]
   ).deploy();
-  return await veiriferMock.getVerifyCalldata();
+  return await veiriferMock.getVerifyCalldata(salt);
 }

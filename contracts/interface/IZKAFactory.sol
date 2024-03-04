@@ -32,13 +32,21 @@ interface IZKAFactory {
     /// @param _url the url of the ZKAVerifier
     /// @param _deployer the deployer of the ZKAVerifier
     /// @param _zkpVerifierAddress the address of the zkpVerifier
-    /// @return the address of the new ZKAVerifier contract
     function deployZKAVerifier(
         string memory _zkpVerifierName,
         string memory _url,
         address _deployer,
         address _zkpVerifierAddress
-    ) external returns (address);
+    ) external;
+
+    /// @dev compute the address of the ZKAVerifier contract
+    /// @param _zkpVerifierName the name of the ZKAVerifier
+    /// @param _url the url of the ZKAVerifier
+    /// @return the address of the ZKAVerifier contract
+    function computeZKAVerifierAddress(
+        string memory _zkpVerifierName,
+        string memory _url
+    ) external view returns (address);
 
     /// @dev only called by the owner, set the implementation of ZKAVerifier
     /// @param _implementation the address of the implementation

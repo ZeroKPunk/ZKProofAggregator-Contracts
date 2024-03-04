@@ -6,6 +6,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IZKAFactory} from "./interface/IZKAFactory.sol";
 import {IZKAVerifier} from "./interface/IZKAVerifier.sol";
 
+import "hardhat/console.sol";
+
 contract ZKAFactory is Ownable, IZKAFactory {
     error NotOfficialVerifier();
     address public override implZKAVerifier;
@@ -33,8 +35,9 @@ contract ZKAFactory is Ownable, IZKAFactory {
     function proofToStorage(
         bytes32 proofKey
     ) external override onlyVerifier(msg.sender) {
-        proofInStorage[proofKey] = uint64(block.timestamp);
-        emit proofToStorageInfo(proofKey, uint64(block.timestamp));
+        uint64 timeStamp = uint64(block.timestamp);
+        proofInStorage[proofKey] = timeStamp;
+        emit proofToStorageInfo(proofKey, timeStamp);
     }
 
     function deployZKAVerifier(
@@ -42,10 +45,10 @@ contract ZKAFactory is Ownable, IZKAFactory {
         string memory _url,
         address _deployer,
         address _zkpVerifierAddress
-    ) external override returns (address) {
+    ) external override {
         address _zkVerifier = Clones.cloneDeterministic(
             implZKAVerifier,
-            keccak256(abi.encode(address(this), _zkpVerifierName))
+            keccak256(abi.encode(address(this), _zkpVerifierName, _url))
         );
         IZKAVerifier(_zkVerifier).initializer(
             address(this),
@@ -60,7 +63,17 @@ contract ZKAFactory is Ownable, IZKAFactory {
         });
         verifierAddress.push(_zkVerifier);
         emit newZKAVerifierInfo(_zkVerifier, _zkpVerifierName, _url, _deployer);
-        return _zkVerifier;
+    }
+
+    function computeZKAVerifierAddress(
+        string memory _zkpVerifierName,
+        string memory _url
+    ) external view override returns (address) {
+        return
+            Clones.predictDeterministicAddress(
+                implZKAVerifier,
+                keccak256(abi.encode(address(this), _zkpVerifierName, _url))
+            );
     }
 
     function fetchAllZKAVerifiers()

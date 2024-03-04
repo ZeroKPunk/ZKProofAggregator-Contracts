@@ -39,18 +39,24 @@ export async function deployZKAVerifier(
   zkpVerifierAddress: string
 ): Promise<string> {
   let newZKAVerifier: string = "";
-  const filter = zkaFactory.filters.newZKAVerifierInfo;
-  const tx = await zkaFactory.deployZKAVerifier(
-    zkpVerifierName,
-    url,
-    deployer,
-    zkpVerifierAddress
-  );
-  await tx.wait();
-
-  const events = await zkaFactory.queryFilter(filter);
-  console.log("events: ", events[0].args);
-  newZKAVerifier = events[0].args?._zkVerifier;
-
+  // const filter = zkaFactory.filters.newZKAVerifierInfo;
+  try {
+    const tx = await zkaFactory.deployZKAVerifier(
+      zkpVerifierName,
+      url,
+      deployer,
+      zkpVerifierAddress
+    );
+    await tx.wait();
+    newZKAVerifier = await zkaFactory.computeZKAVerifierAddress(
+      zkpVerifierName,
+      url
+    );
+  } catch (error) {
+    console.log("error", error);
+  }
+  // const events = await zkaFactory.queryFilter(filter);
+  // newZKAVerifier = events[0].args?._zkVerifier;
+  // zkaFactory.off(filter);
   return newZKAVerifier;
 }

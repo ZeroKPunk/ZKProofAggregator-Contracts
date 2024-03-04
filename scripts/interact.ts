@@ -18,11 +18,29 @@ export async function zkpVerify(
   saveTimestamp: BigInt;
 }> {
   let verifyResult: boolean = true;
+  let proofKey: string = "";
+  let saveTimestamp: BigInt = 0n;
+
+  const contract = new ZKAFactory__factory(signer).attach(
+    await zkaFactory.getAddress()
+  );
+
   const zkaVerifier: ZKAVerifier = ZKAVerifier__factory.connect(
     ZKAVerifierAddress,
     signer
   );
-  const filter = zkaFactory.filters.proofToStorageInfo;
+
+  // const filter = zkaFactory.filters.proofToStorageInfo;
+  contract.once(
+    "proofToStorageInfo",
+    (_proofKey: string, _saveTimestamp: BigInt) => {
+      proofKey = _proofKey;
+      saveTimestamp = _saveTimestamp;
+      console.log("catch event proofKey", proofKey, "saveTimestamp", saveTimestamp);
+
+    }
+  );
+
   try {
     const tx = await zkaVerifier.zkpVerify(zkProof);
     await tx.wait();
@@ -31,11 +49,14 @@ export async function zkpVerify(
     verifyResult = false;
   }
 
-  const events = await zkaFactory.queryFilter(filter);
-
+  // const events = await zkaFactory.queryFilter(filter);
+  if (!proofKey) {
+    throw new Error("No event found");
+  }
+  // contract.removeAllListeners();
   return {
     verifyResult: verifyResult,
-    proofKey: events[0].args?._proofKey,
-    saveTimestamp: events[0].args?._saveTimestamp,
+    proofKey: proofKey,
+    saveTimestamp: saveTimestamp,
   };
 }
