@@ -9,7 +9,7 @@ contract ZKAVerifier is IZKAVerifier {
     address public override ZKAFactory;
     address public override ZKVerifier;
 
-    constructor() {}
+    constructor() payable {}
 
     function initializer(address _ZKAFactory, address _ZKVerifier) external {
         if (ZKAFactory != address(0) || ZKVerifier != address(0)) {
