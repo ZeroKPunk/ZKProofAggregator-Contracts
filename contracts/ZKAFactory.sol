@@ -78,7 +78,7 @@ contract ZKAFactory is Ownable, IZKAFactory {
         external
         view
         override
-        returns (address[] memory, VerifierMeta[] memory)
+        returns (address[] memory allVerifiers, VerifierMeta[] memory allMetas)
     {
         uint256 _length = verifierAddress.length;
         address[] memory _verifiers = new address[](_length);

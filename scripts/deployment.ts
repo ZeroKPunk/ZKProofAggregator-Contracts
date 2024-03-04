@@ -1,4 +1,3 @@
-// import { Signer } from "ethers";
 import {
   ZKAVerifier,
   ZKAVerifier__factory,
@@ -6,8 +5,6 @@ import {
   ZKAFactory__factory,
 } from "../typechain-types";
 import { Signer } from "ethers";
-
-import { newZKAVerifierInfoEvent } from "../typechain-types/contracts/ZKAFactory";
 
 export async function deployZKProofAggregatorImpl(
   signer: Signer

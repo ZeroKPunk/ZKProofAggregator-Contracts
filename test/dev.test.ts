@@ -14,7 +14,7 @@ import {
   deployZKAVerifier,
   deployZKProofAggregatorImpl,
 } from "../scripts/deployment";
-import { zkpVerify } from "../scripts/interact";
+import { fetchAllZKAVerifiersMeta, zkpVerify } from "../scripts/interact";
 import { expect } from "chai";
 import { Signer } from "ethers";
 
@@ -76,10 +76,10 @@ describe("ZKProofAggregator-UnitTest", () => {
 
       const zkaMetaJustDeployed: IZKAFactory.VerifierMetaStruct =
         await zkaFactory.metaZKAVerifiers(await zkaVerifier.getAddress());
-      console.log("zkaMetaJustDeployed: ", zkaMetaJustDeployed);
+      expect(zkaMetaJustDeployed.deployTimestamp).gt(0);
     });
 
-    const allZKAVerifiers = await zkaFactory.fetchAllZKAVerifiers();
+    const allZKAVerifiers = await fetchAllZKAVerifiersMeta(zkaFactory);
     console.log("allZKAVerifiers: ", allZKAVerifiers);
   });
 

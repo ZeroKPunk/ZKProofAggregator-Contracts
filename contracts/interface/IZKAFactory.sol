@@ -59,5 +59,5 @@ interface IZKAFactory {
     function fetchAllZKAVerifiers()
         external
         view
-        returns (address[] memory, VerifierMeta[] memory);
+        returns (address[] memory allVerifiers, VerifierMeta[] memory allMetas);
 }
