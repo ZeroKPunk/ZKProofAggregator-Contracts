@@ -6,8 +6,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IZKAFactory} from "./interface/IZKAFactory.sol";
 import {IZKAVerifier} from "./interface/IZKAVerifier.sol";
 
-import "hardhat/console.sol";
-
 contract ZKAFactory is Ownable, IZKAFactory {
     error NotOfficialVerifier();
     address public override implZKAVerifier;

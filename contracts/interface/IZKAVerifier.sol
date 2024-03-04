@@ -9,4 +9,8 @@ interface IZKAVerifier {
     function ZKVerifier() external view returns (address);
 
     function initializer(address _ZKAFactory, address _ZKVerifier) external;
+
+    function fetchProofKey(
+        bytes calldata proof
+    ) external view returns (bytes32);
 }

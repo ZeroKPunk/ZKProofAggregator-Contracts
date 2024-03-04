@@ -27,9 +27,7 @@ contract ZKAVerifier is IZKAVerifier {
         return success;
     }
 
-    function fetchProofKey(
-        bytes calldata proof
-    ) internal view returns (bytes32) {
+    function fetchProofKey(bytes calldata proof) public view returns (bytes32) {
         return keccak256(abi.encode(proof, address(this)));
     }
 }

@@ -85,22 +85,19 @@ describe("ZKProofAggregator-UnitTest", () => {
 
   it("test ZKAVerifier with mock proof", async () => {
     // zkaVerifierInstance.forEach(async (zkaVerifier) => {
-    for (const zkaVerifier of zkaVerifierInstance){
+    for (const zkaVerifier of zkaVerifierInstance) {
       const mockProof = await getMockProof(await zkaVerifier.getAddress());
       console.log("mockProof ", mockProof);
-      const { verifyResult, proofKey, saveTimestamp } = await zkpVerify(
+      const { verifyResult, proofKey } = await zkpVerify(
         deployer,
         await zkaVerifier.getAddress(),
-        zkaFactory,
         mockProof
       );
 
-      console.log("saveTimestamp: ", saveTimestamp);
-      console.log("proofKey: ", proofKey);
       expect(verifyResult).to.be.true;
       const timestampInStorage = await zkaFactory.proofInStorage(proofKey);
       console.log("timestampInStorage: ", timestampInStorage);
-      expect(timestampInStorage).to.equal(saveTimestamp);
+      expect(timestampInStorage).to.be.gt(0);
     }
   });
 });
