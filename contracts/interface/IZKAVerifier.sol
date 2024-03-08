@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 interface IZKAVerifier {
-    function zkpVerify(bytes calldata zkProof) external returns (bool);
+    function zkpVerify(bytes calldata zkProof) external;
 
     function ZKAFactory() external view returns (address);
 

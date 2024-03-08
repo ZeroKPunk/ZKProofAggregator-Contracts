@@ -25,7 +25,7 @@ contract SPVVerifier is ISPVVerifier {
         return success;
     }
 
-    function setVerifier(address _verifier) external override onlyOwner {
+    function setVerifier(address _verifier) public override onlyOwner {
         spvVerifierImpl = _verifier;
     }
 

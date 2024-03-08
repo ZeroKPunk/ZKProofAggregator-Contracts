@@ -6,6 +6,7 @@ import {IZKAFactory} from "./interface/IZKAFactory.sol";
 
 contract ZKAVerifier is IZKAVerifier {
     error AlreadyInitialized();
+    error VerifyFail();
     address public override ZKAFactory;
     address public override ZKVerifier;
 
@@ -19,12 +20,12 @@ contract ZKAVerifier is IZKAVerifier {
         ZKVerifier = _ZKVerifier;
     }
 
-    function zkpVerify(
-        bytes calldata zkProof
-    ) external override returns (bool) {
-        (bool success, ) = ZKVerifier.call(zkProof);
+    function zkpVerify(bytes calldata zkProof) external override {
+        (bool success, ) = ZKVerifier.call{gas: 600000}(zkProof);
+        if (success != true) {
+            revert VerifyFail();
+        }
         IZKAFactory(ZKAFactory).proofToStorage(fetchProofKey(zkProof));
-        return success;
     }
 
     function fetchProofKey(bytes calldata proof) public view returns (bytes32) {

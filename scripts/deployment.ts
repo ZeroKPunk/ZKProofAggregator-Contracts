@@ -3,8 +3,10 @@ import {
   ZKAVerifier__factory,
   ZKAFactory,
   ZKAFactory__factory,
+  SPVVerifier,
+  SPVVerifier__factory,
 } from "../typechain-types";
-import { Signer } from "ethers";
+import { Signer, ContractTransactionResponse } from "ethers";
 
 export async function deployZKProofAggregatorImpl(
   signer: Signer
@@ -56,4 +58,8 @@ export async function deployZKAVerifier(
   // newZKAVerifier = events[0].args?._zkVerifier;
   // zkaFactory.off(filter);
   return newZKAVerifier;
+}
+
+export async function deploySPVVerifier(signer: Signer): Promise<SPVVerifier> {
+  return await new SPVVerifier__factory(signer).deploy();
 }

@@ -6,10 +6,12 @@ import {
   ZKAVerifier,
   ZKAVerifier__factory,
   ZKAFactory,
+  SPVVerifier,
 } from "../typechain-types";
 import { IZKAFactory } from "../typechain-types/contracts/ZKAFactory";
 import { ethers } from "hardhat";
 import {
+  deploySPVVerifier,
   deployZKAFactory,
   deployZKAVerifier,
   deployZKProofAggregatorImpl,
@@ -17,6 +19,7 @@ import {
 import { fetchAllZKAVerifiersMeta, zkpVerify } from "../scripts/interact";
 import { expect } from "chai";
 import { Signer } from "ethers";
+import { get } from "http";
 
 describe("ZKProofAggregator-UnitTest", () => {
   let signers: HardhatEthersSigner[];
@@ -24,6 +27,7 @@ describe("ZKProofAggregator-UnitTest", () => {
   let deployer: HardhatEthersSigner;
   let zkaFactory: ZKAFactory;
   let zkaVerifierInstance: ZKAVerifier[];
+  let spvVerfier: SPVVerifier;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -45,7 +49,7 @@ describe("ZKProofAggregator-UnitTest", () => {
       deployerAddress,
       zkpVerifierAddress
     );
-    console.log("zkaVerifier address: ", newZKAVerifier);
+    console.log("zka1:", newZKAVerifier, "innerVerifier:", zkpVerifierAddress);
 
     const zkpVerifierName2 = "SNARK";
     const url2 = "http://localhost:8001";
@@ -57,12 +61,20 @@ describe("ZKProofAggregator-UnitTest", () => {
       deployerAddress,
       zkpVerifierAddress2
     );
-    console.log("newZKAVerifier2 address: ", newZKAVerifier2);
+    console.log(
+      "zka2:",
+      newZKAVerifier2,
+      "innerVerifier:",
+      zkpVerifierAddress2
+    );
 
     zkaVerifierInstance = [
       await getZKAVerifier(deployer, newZKAVerifier),
       await getZKAVerifier(deployer, newZKAVerifier2),
     ];
+
+    spvVerfier = await deploySPVVerifier(deployer);
+    await spvVerfier.waitForDeployment();
   });
 
   it("test all contracts should been deployed", async () => {
@@ -99,6 +111,15 @@ describe("ZKProofAggregator-UnitTest", () => {
       console.log("timestampInStorage: ", timestampInStorage);
       expect(timestampInStorage).to.be.gt(0);
     }
+  });
+
+  it("test SPVVerifier", async () => {
+    await spvVerfier.setVerifier(await zkpVerifierMock.getAddress());
+    const proofMock = await getMockProof(await spvVerfier.getAddress());
+
+    const tx = await spvVerfier.verify(proofMock);
+    await tx.wait();
+    console.log("spv verifier pass");
   });
 });
 

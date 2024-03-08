@@ -17,7 +17,7 @@ contract VerifierMock is IverifierMock {
         return
             abi.encodeWithSignature(
                 "verify(bytes)",
-                keccak256(abi.encode("proof", salt))
+                (abi.encode("proof", salt))
             );
     }
 }
